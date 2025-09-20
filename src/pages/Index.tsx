@@ -1,101 +1,113 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Brain, Zap, Trophy, Users } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import GameModeSelector from "@/components/GameModeSelector";
+import { Trophy, Users, Brain, Zap, LogIn, LogOut } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, signOut, loading } = useAuth();
 
-  const features = [
-    {
-      icon: Brain,
-      title: "Smart Questions",
-      description: "AI-powered trivia covering multiple topics"
-    },
-    {
-      icon: Zap,
-      title: "Real-time Feedback",
-      description: "Instant answers with visual feedback"
-    },
-    {
-      icon: Trophy,
-      title: "Leaderboard",
-      description: "Compete with players worldwide"
-    },
-    {
-      icon: Users,
-      title: "Multiplayer Ready",
-      description: "Challenge friends in real-time"
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center">
+        <div className="quiz-pulse text-8xl">🧠</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
-        <div className="text-center space-y-8">
-          {/* Main Title */}
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-8">
+          <div className="text-center flex-1">
+            <div className="quiz-pulse text-8xl mb-6">🧠</div>
+            <h1 className="text-5xl md:text-6xl font-bold text-primary mb-4 gradient-text">
               QuizMaster
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-              Test your knowledge with our interactive trivia game featuring smooth animations and engaging gameplay
+            <p className="text-xl text-muted-foreground mb-8">
+              Challenge your knowledge, compete with friends, and climb the leaderboard!
             </p>
           </div>
-
-          {/* 3D Start Button */}
-          <div className="py-8">
-            <Button
-              onClick={() => navigate("/quiz")}
-              size="lg"
-              className="btn-quiz-start text-xl px-12 py-6 font-bold text-primary-foreground border-0 shadow-2xl"
-            >
-              <Brain className="mr-3 h-6 w-6" />
-              Start Quiz Adventure
-            </Button>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-16">
-            {features.map((feature, index) => (
-              <Card
-                key={index}
-                className={`card-3d p-6 text-center space-y-4 animate-delay-${(index + 1) * 100}`}
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="flex justify-center">
-                  <feature.icon className="h-12 w-12 text-primary" />
+          
+          <div className="flex items-center gap-4">
+            {user ? (
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="font-semibold">Welcome back!</p>
+                  <p className="text-sm text-muted-foreground">@{user.user_metadata?.username || user.email?.split('@')[0]}</p>
                 </div>
-                <h3 className="text-lg font-semibold text-card-foreground">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {feature.description}
-                </p>
-              </Card>
-            ))}
+                <Button variant="outline" onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={() => navigate("/auth")}>
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Button>
+            )}
           </div>
+        </div>
 
-          {/* Quick Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/leaderboard")}
-              className="px-8 py-3"
+        {/* Game Mode Selector */}
+        <GameModeSelector />
+
+        {/* Quick Actions */}
+        <div className="mt-12 text-center">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/leaderboard")}
+            className="text-lg px-8 py-4 h-auto"
+          >
+            <Trophy className="mr-2 h-5 w-5" />
+            View Leaderboard
+          </Button>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-16">
+          {[
+            {
+              icon: Brain,
+              title: "Smart Questions",
+              description: "AI-powered trivia covering multiple topics"
+            },
+            {
+              icon: Zap,
+              title: "Real-time Feedback", 
+              description: "Instant answers with visual feedback"
+            },
+            {
+              icon: Trophy,
+              title: "Leaderboard",
+              description: "Compete with players worldwide"
+            },
+            {
+              icon: Users,
+              title: "Multiplayer Ready",
+              description: "Challenge friends in real-time"
+            }
+          ].map((feature, index) => (
+            <Card
+              key={index}
+              className="card-3d p-6 text-center space-y-4 score-item"
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <Trophy className="mr-2 h-5 w-5" />
-              View Leaderboard
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => navigate("/quiz")}
-              className="px-8 py-3"
-            >
-              <Zap className="mr-2 h-5 w-5" />
-              Quick Play
-            </Button>
-          </div>
+              <div className="flex justify-center">
+                <feature.icon className="h-12 w-12 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-card-foreground">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {feature.description}
+              </p>
+            </Card>
+          ))}
         </div>
       </div>
 
